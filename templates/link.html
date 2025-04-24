@@ -1,0 +1,58 @@
+<html>
+<head>
+  <title>Link Your Bank</title>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+</head>
+<body>
+  <h2>🔗 Link a Bank Account</h2>
+  <button id="link-button">Link Account</button>
+
+  <hr>
+  <h3>💸 Simulate Sweep</h3>
+  <button id="simulate-button">Check for Sweepable Funds</button>
+  <ul id="results"></ul>
+
+  <script>
+    fetch('/create_link_token', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        const handler = Plaid.create({
+          token: data.link_token,
+          onSuccess: function(public_token, metadata) {
+            fetch('/exchange_public_token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ public_token: public_token })
+            })
+            .then(res => res.json())
+            .then(data => alert(data.message || data.error));
+          }
+        });
+        document.getElementById('link-button').onclick = function() {
+          handler.open();
+        };
+      });
+
+    document.getElementById('simulate-button').onclick = function() {
+      fetch('/simulate_sweep')
+        .then(res => res.json())
+        .then(data => {
+          const resultsList = document.getElementById('results');
+          resultsList.innerHTML = '';
+
+          if (data.sweep_summary && data.sweep_summary.length > 0) {
+            data.sweep_summary.forEach(account => {
+              const li = document.createElement('li');
+              li.innerText = `✅ ${account.name}: $${account.sweep_amount} to sweep (Balance: $${account.available_balance})`;
+              resultsList.appendChild(li);
+            });
+          } else {
+            const li = document.createElement('li');
+            li.innerText = 'No sweepable funds found.';
+            resultsList.appendChild(li);
+          }
+        });
+    };
+  </script>
+</body>
+</html>

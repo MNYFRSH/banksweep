@@ -1,0 +1,13 @@
+<h2>🏠 Dashboard</h2>
+<p><a href="/sweep-rules">Edit Sweep Rules</a></p>
+<p><a href="/link">Link Bank + Simulate</a></p>
+
+{% if session.sweep_rule %}
+  <h3>Current Sweep Rule:</h3>
+  <ul>
+    <li>Threshold: ${{ session.sweep_rule.threshold }}</li>
+    <li>Frequency: {{ session.sweep_rule.frequency }}</li>
+  </ul>
+{% else %}
+  <p>No sweep rules set yet.</p>
+{% endif %}
