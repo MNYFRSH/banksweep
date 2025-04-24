@@ -2,3 +2,4 @@ flask
 python-dotenv
 requests
 plaid-python
+pip freeze > requirements.txt
